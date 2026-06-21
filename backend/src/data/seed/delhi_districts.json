@@ -1,0 +1,13 @@
+[
+  { "district_name": "Central Delhi", "code": "central", "lat": 28.6358, "lng": 77.2245, "total_population": 582320, "area_sqkm": 25 },
+  { "district_name": "East Delhi", "code": "east", "lat": 28.6280, "lng": 77.3050, "total_population": 1709346, "area_sqkm": 64 },
+  { "district_name": "New Delhi", "code": "new_delhi", "lat": 28.6139, "lng": 77.2090, "total_population": 142004, "area_sqkm": 35 },
+  { "district_name": "North Delhi", "code": "north", "lat": 28.7041, "lng": 77.1025, "total_population": 887978, "area_sqkm": 60 },
+  { "district_name": "North East Delhi", "code": "north_east", "lat": 28.6920, "lng": 77.2730, "total_population": 2241624, "area_sqkm": 60 },
+  { "district_name": "North West Delhi", "code": "north_west", "lat": 28.7200, "lng": 77.0700, "total_population": 3656539, "area_sqkm": 440 },
+  { "district_name": "Shahdara", "code": "shahdara", "lat": 28.6740, "lng": 77.2925, "total_population": 1341600, "area_sqkm": 25 },
+  { "district_name": "South Delhi", "code": "south", "lat": 28.5244, "lng": 77.2167, "total_population": 2731929, "area_sqkm": 250 },
+  { "district_name": "South East Delhi", "code": "south_east", "lat": 28.5635, "lng": 77.2875, "total_population": 1535342, "area_sqkm": 44 },
+  { "district_name": "South West Delhi", "code": "south_west", "lat": 28.5500, "lng": 77.0920, "total_population": 2292958, "area_sqkm": 420 },
+  { "district_name": "West Delhi", "code": "west", "lat": 28.6517, "lng": 77.0517, "total_population": 2543243, "area_sqkm": 129 }
+]
