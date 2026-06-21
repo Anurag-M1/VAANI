@@ -25,7 +25,7 @@ router.get('/dashboard', auth, authorize('cm', 'cm_staff', 'district_officer', '
         break;
     }
 
-    const [total, todayFiled, todayResolved, pending, defconRed, defconOrange, slaBreach, disputed] = await Promise.all([
+    const [total, todayFiled, todayResolved, pending, defconRed, defconOrange, slaBreach, disputed, totalSlaBreached] = await Promise.all([
       Complaint.countDocuments(filter),
       Complaint.countDocuments({ ...filter, createdAt: { $gte: today } }),
       Complaint.countDocuments({ ...filter, status: { $in: ['CLOSED', 'PROVISIONALLY_CLOSED'] }, 'closure.final_closed_at': { $gte: today } }),
@@ -34,12 +34,16 @@ router.get('/dashboard', auth, authorize('cm', 'cm_staff', 'district_officer', '
       Complaint.countDocuments({ ...filter, priority: 'DEFCON_ORANGE', status: { $nin: ['CLOSED', 'PROVISIONALLY_CLOSED'] } }),
       Complaint.countDocuments({ ...filter, sla_breached: true, status: { $nin: ['CLOSED', 'PROVISIONALLY_CLOSED'] } }),
       Complaint.countDocuments({ ...filter, status: 'DISPUTED' }),
+      Complaint.countDocuments({ ...filter, sla_breached: true }),
     ]);
+
+    const slaCompliance = total > 0 ? Math.round(((total - totalSlaBreached) / total) * 100) : 100;
 
     res.json({
       total, todayFiled, todayResolved, pending,
       defconRed, defconOrange, slaBreach, disputed,
       criticalAlerts: defconRed + defconOrange,
+      slaCompliance,
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to get dashboard data' });
@@ -168,13 +172,25 @@ router.get('/defcon', auth, async (req, res) => {
 router.get('/trends', auth, async (req, res) => {
   try {
     const days = parseInt(req.query.days) || 7;
+    const filter = {};
+    switch (req.user.role) {
+      case 'department_manager':
+      case 'nodal_officer':
+      case 'commissioner':
+        if (req.user.department) filter.department_id = req.user.department;
+        break;
+      case 'district_officer':
+        if (req.user.district) filter['location.district'] = req.user.district.toLowerCase().replace(/\s+/g, '_');
+        break;
+    }
+
     const trends = [];
     for (let i = days - 1; i >= 0; i--) {
       const start = new Date(); start.setDate(start.getDate() - i); start.setHours(0,0,0,0);
       const end = new Date(start); end.setDate(end.getDate() + 1);
       const [filed, resolved] = await Promise.all([
-        Complaint.countDocuments({ createdAt: { $gte: start, $lt: end } }),
-        Complaint.countDocuments({ 'closure.final_closed_at': { $gte: start, $lt: end } }),
+        Complaint.countDocuments({ ...filter, createdAt: { $gte: start, $lt: end } }),
+        Complaint.countDocuments({ ...filter, status: { $in: ['CLOSED', 'PROVISIONALLY_CLOSED'] }, 'closure.final_closed_at': { $gte: start, $lt: end } }),
       ]);
       trends.push({ date: start.toISOString().slice(0, 10), filed, resolved });
     }
@@ -382,6 +398,53 @@ router.get('/officers', auth, authorize('department_manager', 'district_officer'
     res.json({ officers });
   } catch (err) {
     res.status(500).json({ error: 'Failed to get officers' });
+  }
+});
+
+router.post('/officers', auth, authorize('cm', 'cm_staff', 'super_admin', 'department_manager'), async (req, res) => {
+  try {
+    const { name, mobile, email, district, department, designation } = req.body;
+    if (!name || !mobile || !department) {
+      return res.status(400).json({ error: 'Name, mobile and department are required' });
+    }
+
+    const existingUser = await User.findOne({ mobile });
+    if (existingUser) {
+      return res.status(400).json({ error: 'An officer/user with this mobile number already exists.' });
+    }
+
+    const officer = new User({
+      name,
+      mobile,
+      email,
+      role: 'officer',
+      district: district ? district.toLowerCase().replace(/\s+/g, '_') : 'central',
+      department,
+      officer_profile: {
+        designation: designation || 'Field Officer',
+        active_complaints_count: 0,
+        max_capacity: 20,
+        is_available: true,
+        contact_phone: mobile,
+        scorecard: {
+          total_assigned: 0,
+          total_resolved: 0,
+          total_disputed: 0,
+          false_closure_rate: 0,
+          avg_resolution_time_hours: 0,
+          citizen_satisfaction_avg: 0,
+          on_time_rate: 0,
+          anomaly_flag_count: 0,
+          credibility_score: 100
+        }
+      }
+    });
+
+    await officer.save();
+    res.status(201).json({ success: true, officer });
+  } catch (err) {
+    console.error('Failed to create officer:', err);
+    res.status(500).json({ error: 'Failed to create officer' });
   }
 });
 

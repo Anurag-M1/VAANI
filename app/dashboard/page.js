@@ -179,7 +179,8 @@ export default function DashboardPage() {
     slaCompliance: 80,
     avgResolutionDays: '2.4 days',
     citizenSatisfaction: 85,
-    falseClosure: 4.8,
+    falseClosure: 0,
+    disputedCount: 0,
   });
   const [criticalComplaints, setCriticalComplaints] = useState([]);
   const [recentComplaints, setRecentComplaints] = useState([]);
@@ -202,17 +203,20 @@ export default function DashboardPage() {
       if (dashboardRes && !dashboardRes.error) {
         const resolved = dashboardRes.todayResolved || 0;
         const disputed = dashboardRes.disputed || 0;
-        const fRate = resolved > 0 ? Math.round((disputed / resolved) * 100) : 0;
+        const total = dashboardRes.total || 0;
+        const slaBreach = dashboardRes.slaBreach || 0;
+        const fRate = resolved > 0 ? parseFloat(((disputed / resolved) * 100).toFixed(1)) : 0;
         
         setStats(prev => ({
           ...prev,
-          totalComplaints: dashboardRes.total || 0,
+          totalComplaints: total,
           todayComplaints: dashboardRes.todayFiled || 0,
           pendingComplaints: dashboardRes.pending || 0,
           resolvedToday: resolved,
           criticalAlerts: dashboardRes.criticalAlerts || 0,
-          slaCompliance: dashboardRes.slaBreach > 0 ? Math.max(45, Math.round(((dashboardRes.total - dashboardRes.slaBreach) / dashboardRes.total) * 100)) : 88,
-          falseClosure: fRate || 4.2,
+          slaCompliance: dashboardRes.slaCompliance !== undefined ? dashboardRes.slaCompliance : 88,
+          falseClosure: fRate,
+          disputedCount: disputed,
         }));
       }
 
@@ -480,11 +484,16 @@ export default function DashboardPage() {
           <div className="stat-card-label-hi">नागरिक संतुष्टि</div>
         </div>
 
-        <div className="stat-card" style={{ '--stat-accent': '#D50000', '--stat-bg': '#FFCDD2' }}>
+        <div
+          className="stat-card"
+          style={{ '--stat-accent': '#D50000', '--stat-bg': '#FFCDD2', cursor: 'pointer' }}
+          onClick={() => router.push('/dashboard/complaints?status=disputed')}
+          title="View all false closure / disputed cases"
+        >
           <div className="stat-card-icon" style={{ background: '#FFCDD2' }}>⚠️</div>
-          <div className="stat-card-value">{stats.falseClosure}%</div>
-          <div className="stat-card-label">False Closure Rate</div>
-          <div className="stat-card-label-hi">झूठी बंदी दर</div>
+          <div className="stat-card-value">{stats.disputedCount}</div>
+          <div className="stat-card-label">False Closure Cases</div>
+          <div className="stat-card-label-hi">झूठी बंदी ({stats.falseClosure}%)</div>
         </div>
       </div>
 
@@ -795,16 +804,25 @@ export default function DashboardPage() {
       )}
 
       {/* ---- FALSE CLOSURE ALERTS ---- */}
-      {falseClosureAlerts.length > 0 && (
+      {(falseClosureAlerts.length > 0 || stats.disputedCount > 0) && (
         <div className="card" style={{ marginBottom: 'var(--space-8)', border: '2px solid var(--priority-critical)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
           <div className="card-header" style={{ background: '#FFF5F5' }}>
             <div className="card-title" style={{ color: 'var(--priority-critical)' }}>
               ⚠️ False Closure Alerts
               <span className="card-title-hi" style={{ color: 'var(--priority-critical)' }}>झूठी बंदी सूचनाएं</span>
             </div>
-            <span className="badge badge-lg" style={{ background: 'var(--priority-critical)', color: 'white', borderRadius: 'var(--radius-full)' }}>
-              {falseClosureAlerts.length} cases
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+              <span className="badge badge-lg" style={{ background: 'var(--priority-critical)', color: 'white', borderRadius: 'var(--radius-full)', padding: '4px 12px' }}>
+                {stats.disputedCount} cases
+              </span>
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => router.push('/dashboard/complaints?status=disputed')}
+                id="btn-view-all-false-closure"
+              >
+                View All →
+              </button>
+            </div>
           </div>
           <div className="card-body" style={{ padding: 0 }}>
             {falseClosureAlerts.slice(0, 3).map((c, i) => (

@@ -15,6 +15,7 @@ router.get('/:id', auth, c.getComplaint);
 // Status + Timeline
 router.patch('/:id/status', auth, authorize('officer', 'department_manager', 'district_officer', 'nodal_officer', 'commissioner', 'cm_staff', 'cm', 'super_admin'), c.updateStatus);
 router.post('/:id/timeline', auth, c.addTimeline);
+router.post('/:id/assign', auth, authorize('cm', 'cm_staff', 'department_manager', 'district_officer', 'nodal_officer', 'commissioner', 'super_admin'), c.assignComplaint);
 
 // Anti-False-Closure
 router.post('/:id/resolve', auth, authorize('officer', 'department_manager', 'district_officer', 'super_admin'), c.resolveComplaint);

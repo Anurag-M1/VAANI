@@ -205,6 +205,36 @@ export default function CitizenPortal() {
     }
   }, [trackedComplaint?._id]);
   const [trackingLoading, setTrackingLoading] = useState(false);
+  const [myComplaints, setMyComplaints] = useState([]);
+  const [loadingMyComplaints, setLoadingMyComplaints] = useState(false);
+  const [myComplaintsError, setMyComplaintsError] = useState('');
+
+  const fetchMyComplaints = async () => {
+    if (!citizenUser) return;
+    setLoadingMyComplaints(true);
+    setMyComplaintsError('');
+    try {
+      const res = await complaintsApi.myComplaints();
+      if (res && res.complaints) {
+        setMyComplaints(res.complaints);
+      } else {
+        throw new Error(res?.error || 'Failed to load your complaints');
+      }
+    } catch (err) {
+      console.error('Failed to load my complaints:', err);
+      setMyComplaintsError('Failed to load your complaints list.');
+    } finally {
+      setLoadingMyComplaints(false);
+    }
+  };
+
+  useEffect(() => {
+    if (citizenUser) {
+      fetchMyComplaints();
+    } else {
+      setMyComplaints([]);
+    }
+  }, [citizenUser]);
 
   // Verify State
   const [verifying, setVerifying] = useState(false);
@@ -249,6 +279,7 @@ export default function CitizenPortal() {
       if (res && res.success) {
         setFiledId(res.complaint.complaint_id);
         setSubmitted(true);
+        fetchMyComplaints(); // Update complaints list after filing a new one
       } else {
         throw new Error(res?.error || 'Filing failed');
       }
@@ -513,7 +544,7 @@ export default function CitizenPortal() {
           <button
             className={`btn ${activeTab === 'track' ? 'btn-primary' : 'btn-ghost'}`}
             style={{ flex: 1, borderRadius: 'var(--radius-md)' }}
-            onClick={() => { setActiveTab('track'); setTrackedComplaint(null); setTrackError(''); }}
+            onClick={() => { setActiveTab('track'); setTrackedComplaint(null); setTrackError(''); fetchMyComplaints(); }}
             id="tab-track"
           >
             🔍 Track Status / स्थिति जानें
@@ -752,6 +783,108 @@ export default function CitizenPortal() {
               </div>
             </div>
 
+            {/* Raised complaints list by citizen */}
+            {citizenUser && (
+              <div className="card animate-fade-in" style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)' }}>
+                <div className="card-header" style={{ borderBottom: '1px solid var(--color-border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div className="card-title" style={{ fontSize: 'var(--text-base)' }}>
+                    📋 Your Raised Complaints / आपकी शिकायतें ({myComplaints.length})
+                  </div>
+                  <button 
+                    onClick={(e) => { e.preventDefault(); fetchMyComplaints(); }}
+                    className="btn btn-ghost btn-xs" 
+                    title="Refresh List"
+                    disabled={loadingMyComplaints}
+                    style={{ padding: '4px 8px', fontSize: '11px', height: 'auto', minHeight: 0 }}
+                  >
+                    {loadingMyComplaints ? '🔄...' : '🔄 Refresh'}
+                  </button>
+                </div>
+                <div className="card-body" style={{ maxHeight: '350px', overflowY: 'auto', padding: 'var(--space-4)' }}>
+                  {loadingMyComplaints && myComplaints.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: 'var(--space-4)', color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
+                      Loading your complaints... / शिकायतें लोड हो रही हैं...
+                    </div>
+                  ) : myComplaintsError ? (
+                    <div style={{ color: 'var(--priority-critical)', textAlign: 'center', padding: 'var(--space-4)', fontSize: 'var(--text-sm)' }}>
+                      {myComplaintsError}
+                    </div>
+                  ) : myComplaints.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: 'var(--space-4)', color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
+                      No complaints registered yet. / अभी तक कोई शिकायत दर्ज नहीं की गई है।
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+                      {myComplaints.map((c) => {
+                        const isSelected = trackedComplaint?.complaint_id === c.complaint_id;
+                        return (
+                          <div
+                            key={c._id}
+                            onClick={() => {
+                              setTrackingId(c.complaint_id);
+                              setTrackedComplaint(c);
+                              setTrackError('');
+                            }}
+                            style={{
+                              background: isSelected ? 'rgba(255, 153, 51, 0.08)' : 'var(--color-surface)',
+                              border: isSelected ? '1.5px solid var(--color-saffron)' : '1px solid var(--color-border-light)',
+                              borderRadius: 'var(--radius-md)',
+                              padding: 'var(--space-3) var(--space-4)',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              gap: 'var(--space-3)',
+                              transition: 'all 0.2s',
+                              boxShadow: isSelected ? 'var(--shadow-sm)' : 'none',
+                            }}
+                          >
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap' }}>
+                                <span style={{ fontWeight: 700, fontSize: 'var(--text-sm)', color: isSelected ? 'var(--color-primary)' : 'inherit' }}>
+                                  {c.complaint_id}
+                                </span>
+                                <span className={`badge badge-${c.status?.toLowerCase()}`} style={{ fontSize: '10px', padding: '2px 6px', textTransform: 'capitalize' }}>
+                                  {c.status?.toLowerCase()?.replace(/_/g, ' ')}
+                                </span>
+                                {c.priority && ['DEFCON_RED', 'DEFCON_ORANGE'].includes(c.priority) && (
+                                  <span style={{
+                                    background: c.priority === 'DEFCON_RED' ? 'var(--priority-critical)' : 'var(--priority-major)',
+                                    color: 'white',
+                                    fontSize: '9px',
+                                    fontWeight: 800,
+                                    padding: '2px 6px',
+                                    borderRadius: 'var(--radius-sm)'
+                                  }}>
+                                    ⚠️ {c.priority.replace('DEFCON_', '')}
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{
+                                fontSize: 'var(--text-xs)',
+                                color: 'var(--color-text-secondary)',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}>
+                                {c.complaint_text}
+                              </div>
+                              <div style={{ fontSize: '10px', color: 'var(--color-text-muted)', marginTop: '4px' }}>
+                                📍 {c.location?.address} • {new Date(c.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              </div>
+                            </div>
+                            <div style={{ fontSize: '1.2rem', color: isSelected ? 'var(--color-saffron)' : 'var(--color-text-muted)' }}>
+                              {isSelected ? '👉' : '🔍'}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* TRACK RESULT COMPLAINT DETAILS */}
             {trackedComplaint && (
               <div className="card animate-fade-in">
@@ -791,7 +924,7 @@ export default function CitizenPortal() {
                       <div style={{ background: 'white', padding: 'var(--space-3)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-4)' }}>
                         <strong>Officer Speaking Order:</strong>
                         <p style={{ margin: '4px 0 0 0', fontStyle: 'italic', fontSize: 'var(--text-sm)' }}>
-                          "{trackedComplaint.closure?.speaking_order || 'No description provided'}"
+                          &ldquo;{trackedComplaint.closure?.speaking_order || 'No description provided'}&rdquo;
                         </p>
                       </div>
 
@@ -937,7 +1070,7 @@ export default function CitizenPortal() {
                                   margin: '6px 0',
                                   fontWeight: 500
                                 }}>
-                                  "{item.note}"
+                                  &ldquo;{item.note}&rdquo;
                                 </div>
                               )}
                               <div style={{ fontSize: '10px', color: 'var(--color-text-muted)', marginTop: '2px' }}>

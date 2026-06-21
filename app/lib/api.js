@@ -131,6 +131,7 @@ export const complaints = {
   cmFlag: (id) => request(`/complaints/${id}/cm-flag`, { method: 'POST' }),
   cmDirective: (id, directive) => request(`/complaints/${id}/cm-directive`, { method: 'POST', body: JSON.stringify({ directive }) }),
   extendSla: (id, hours, reason) => request(`/complaints/${id}/extend-sla`, { method: 'POST', body: JSON.stringify({ hours, reason }) }),
+  assign: (id, officerId) => request(`/complaints/${id}/assign`, { method: 'POST', body: JSON.stringify({ officerId }) }),
   myComplaints: () => request('/complaints/my'),
   officerQueue: () => request('/complaints/officer/queue'),
   duplicateCheck: (lat, lng, category) => request(`/complaints/duplicate-check?lat=${lat}&lng=${lng}&category=${category}`),
@@ -153,6 +154,7 @@ export const resources = {
     const qs = new URLSearchParams(params).toString();
     return request(`/officers?${qs}`);
   },
+  createOfficer: (data) => request('/officers', { method: 'POST', body: JSON.stringify(data) }),
   officerScorecard: (id) => request(`/officers/${id}/scorecard`),
   departments: () => request('/departments'),
   department: (id) => request(`/departments/${id}`),

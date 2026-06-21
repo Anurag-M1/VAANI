@@ -1,9 +1,25 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { COMPLAINT_CATEGORIES, DELHI_DISTRICTS, DEPARTMENTS, COMPLAINT_STATUS, PRIORITY_LEVELS } from '@/data/complaints';
+import { useRouter, useSearchParams } from 'next/navigation';
+// All statuses that exist in the backend (used for filter dropdown)
+const ALL_STATUSES = [
+  { value: 'FILED', label: 'Filed' },
+  { value: 'PENDING_ASSIGN', label: 'Pending Assignment' },
+  { value: 'ASSIGNED', label: 'Assigned' },
+  { value: 'IN_PROGRESS', label: 'In Progress' },
+  { value: 'PENDING_CLOSURE', label: 'Pending Closure' },
+  { value: 'PROVISIONALLY_CLOSED', label: 'Provisionally Closed' },
+  { value: 'DEPT_VERIFIED', label: 'Dept Verified' },
+  { value: 'DM_VERIFIED', label: 'DM Verified' },
+  { value: 'RESOLVED', label: 'Resolved' },
+  { value: 'CLOSED', label: 'Closed' },
+  { value: 'ESCALATED', label: 'Escalated' },
+  { value: 'DISPUTED', label: '⚠️ False Closure / Disputed' },
+  { value: 'DEFCON_ALERT', label: '🚨 DEFCON Alert' },
+];
 import { complaints as apiComplaints, getStoredUser } from '../../lib/api';
+import { DELHI_DISTRICTS, DEPARTMENTS } from '../../../data/complaints';
 
 const mapApiComplaintToMock = (c) => ({
   id: c.complaint_id,
@@ -53,17 +69,23 @@ function PriorityBadge({ priority }) {
 
 export default function ComplaintsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  // Read initial status from URL query (?status=disputed)
+  const [statusFilter, setStatusFilter] = useState(() => {
+    const s = searchParams?.get('status');
+    return s ? s.toUpperCase() : 'all';
+  });
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [districtFilter, setDistrictFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const [sortBy, setSortBy] = useState('newest');
   const [complaintsList, setComplaintsList] = useState([]);
+  const [apiStatusCounts, setApiStatusCounts] = useState({});
   const [loading, setLoading] = useState(true);
-  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const stored = getStoredUser();
@@ -82,9 +104,10 @@ export default function ComplaintsPage() {
     async function loadData() {
       try {
         setLoading(true);
-        const params = {};
+        const params = { page, limit: 20 };
         if (statusFilter !== 'all') params.status = statusFilter.toUpperCase();
-        if (priorityFilter !== 'all') params.priority = priorityFilter.startsWith('DEFCON_') ? priorityFilter : `DEFCON_${priorityFilter.toUpperCase()}`;
+        // Priority: backend expects raw value like DEFCON_RED, HIGH, etc.
+        if (priorityFilter !== 'all') params.priority = priorityFilter.toUpperCase();
         if (districtFilter !== 'all') params.district = districtFilter;
         if (departmentFilter !== 'all') params.department = departmentFilter;
         if (searchQuery) params.search = searchQuery;
@@ -95,34 +118,48 @@ export default function ComplaintsPage() {
 
         const res = await apiComplaints.list(params);
         if (res && res.complaints) {
-          setComplaintsList(res.complaints.map(mapApiComplaintToMock));
-          setIsDemoMode(false);
+          const mapped = res.complaints.map(mapApiComplaintToMock);
+          if (page === 1) {
+            setComplaintsList(mapped);
+          } else {
+            setComplaintsList(prev => [...prev, ...mapped]);
+          }
+          setApiStatusCounts(res.statusCounts || {});
         } else {
           throw new Error('API failed');
         }
       } catch (err) {
         console.error('Failed to load complaints:', err);
-        setComplaintsList([]);
+        if (page === 1) setComplaintsList([]);
+        setApiStatusCounts({});
       } finally {
         setLoading(false);
       }
     }
     loadData();
-  }, [searchQuery, statusFilter, priorityFilter, districtFilter, departmentFilter, sortBy]);
+  }, [searchQuery, statusFilter, priorityFilter, districtFilter, departmentFilter, sortBy, page]);
 
   const filteredComplaints = complaintsList;
 
   const statusCounts = useMemo(() => {
-    const counts = { all: complaintsList.length };
-    complaintsList.forEach(c => { counts[c.status] = (counts[c.status] || 0) + 1; });
+    const counts = { all: apiStatusCounts.ALL || 0 };
+    ALL_STATUSES.forEach(s => {
+      counts[s.value] = apiStatusCounts[s.value] || 0;
+    });
     return counts;
-  }, [complaintsList]);
+  }, [apiStatusCounts]);
+
+  const handleFilterChange = (filterSetter, value) => {
+    filterSetter(value);
+    setPage(1);
+  };
 
   const clearFilters = () => {
     setSearchQuery('');
     setStatusFilter('all');
     setPriorityFilter('all');
     setSortBy('newest');
+    setPage(1);
     if (!user || user.role !== 'district_officer') {
       setDistrictFilter('all');
     }
@@ -137,7 +174,7 @@ export default function ComplaintsPage() {
       <div className="page-header">
         <div className="page-title">
           <h1>📋 All Complaints</h1>
-          <span className="page-title-hi">सभी शिकायतें — कुल {filteredComplaints.length} शिकायतें</span>
+          <span className="page-title-hi">सभी शिकायतें — कुल {statusCounts[statusFilter] !== undefined ? statusCounts[statusFilter] : filteredComplaints.length} शिकायतें</span>
         </div>
         <div className="page-actions">
           <button
@@ -164,7 +201,7 @@ export default function ComplaintsPage() {
           type="text"
           placeholder="Search by ID, description, area, citizen name... / खोजें..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
           id="complaints-search"
         />
       </div>
@@ -172,22 +209,25 @@ export default function ComplaintsPage() {
       {/* Filters */}
       <div style={{ display: 'flex', gap: 'var(--space-4)', marginBottom: 'var(--space-6)', flexWrap: 'wrap', alignItems: 'center' }}>
         {/* Status Filter */}
-        <div className="form-group" style={{ marginBottom: 0, minWidth: 160 }}>
-          <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} id="filter-status" style={{ minHeight: 44 }}>
-            <option value="all">All Status ({statusCounts.all})</option>
-            {Object.values(COMPLAINT_STATUS).map(s => (
-              <option key={s} value={s.toLowerCase()}>{s.replace(/_/g, ' ')} ({statusCounts[s.toLowerCase()] || 0})</option>
+        <div className="form-group" style={{ marginBottom: 0, minWidth: 200 }}>
+          <select className="form-select" value={statusFilter} onChange={(e) => handleFilterChange(setStatusFilter, e.target.value)} id="filter-status" style={{ minHeight: 44 }}>
+            <option value="all">All Status ({statusCounts.all || 0})</option>
+            {ALL_STATUSES.map(s => (
+              <option key={s.value} value={s.value}>
+                {s.label} ({statusCounts[s.value] || 0})
+              </option>
             ))}
           </select>
         </div>
 
         {/* Priority Filter */}
         <div className="form-group" style={{ marginBottom: 0, minWidth: 140 }}>
-          <select className="form-select" value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} id="filter-priority" style={{ minHeight: 44 }}>
+          <select className="form-select" value={priorityFilter} onChange={(e) => handleFilterChange(setPriorityFilter, e.target.value)} id="filter-priority" style={{ minHeight: 44 }}>
             <option value="all">All Priority</option>
-            {Object.values(PRIORITY_LEVELS).map(p => (
-              <option key={p} value={p.toLowerCase()}>{p}</option>
-            ))}
+            <option value="DEFCON_RED">🔴 DEFCON Red / Critical</option>
+            <option value="DEFCON_ORANGE">🟠 DEFCON Orange / High</option>
+            <option value="DEFCON_YELLOW">🟡 DEFCON Yellow / Medium</option>
+            <option value="DEFCON_GREEN">🟢 DEFCON Green / Low</option>
           </select>
         </div>
 
@@ -196,7 +236,7 @@ export default function ComplaintsPage() {
           <select
             className="form-select"
             value={districtFilter}
-            onChange={(e) => setDistrictFilter(e.target.value)}
+            onChange={(e) => handleFilterChange(setDistrictFilter, e.target.value)}
             disabled={user && user.role === 'district_officer'}
             id="filter-district"
             style={{ minHeight: 44 }}
@@ -213,7 +253,7 @@ export default function ComplaintsPage() {
           <select
             className="form-select"
             value={departmentFilter}
-            onChange={(e) => setDepartmentFilter(e.target.value)}
+            onChange={(e) => handleFilterChange(setDepartmentFilter, e.target.value)}
             disabled={user && ['department_manager', 'nodal_officer', 'commissioner'].includes(user.role)}
             id="filter-department"
             style={{ minHeight: 44 }}
@@ -227,7 +267,7 @@ export default function ComplaintsPage() {
 
         {/* Sort */}
         <div className="form-group" style={{ marginBottom: 0, minWidth: 140 }}>
-          <select className="form-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)} id="filter-sort" style={{ minHeight: 44 }}>
+          <select className="form-select" value={sortBy} onChange={(e) => handleFilterChange(setSortBy, e.target.value)} id="filter-sort" style={{ minHeight: 44 }}>
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
             <option value="priority">Priority</option>
@@ -242,7 +282,7 @@ export default function ComplaintsPage() {
 
       {/* Results Count */}
       <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--space-4)' }}>
-        Showing <strong>{filteredComplaints.length}</strong> complaints
+        Showing <strong>{filteredComplaints.length}</strong> of <strong>{statusCounts[statusFilter] !== undefined ? statusCounts[statusFilter] : filteredComplaints.length}</strong> complaints
         {searchQuery && <> for &quot;<strong>{searchQuery}</strong>&quot;</>}
       </div>
 
@@ -334,6 +374,19 @@ export default function ComplaintsPage() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Load More Button */}
+      {!loading && filteredComplaints.length < (statusCounts[statusFilter] || 0) && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--space-6)', marginBottom: 'var(--space-8)' }}>
+          <button 
+            className="btn btn-outline" 
+            onClick={() => setPage(prev => prev + 1)}
+            id="btn-load-more-complaints"
+          >
+            Load More Complaints / और शिकायतें लोड करें
+          </button>
         </div>
       )}
 

@@ -89,6 +89,15 @@ const complaintSchema = new mongoose.Schema({
   cm_flagged: { type: Boolean, default: false },
   cm_directive: String,
   visit_id: { type: mongoose.Schema.Types.ObjectId, ref: 'VisitLog' },
+  ai_analysis: {
+    is_fake: { type: Boolean, default: false },
+    fraud_probability: { type: Number, default: 0 },
+    evidence_authentic: { type: Boolean, default: true },
+    authenticity_score: { type: Number, default: 100 },
+    flags: [String],
+    verdict: { type: String, enum: ['PASSED', 'WARNING', 'FAILED'], default: 'PASSED' },
+    checked_at: { type: Date, default: Date.now }
+  }
 }, { timestamps: true });
 
 // Indexes per spec

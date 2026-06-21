@@ -2,6 +2,7 @@ const Complaint = require('../models/Complaint');
 const User = require('../models/User');
 const Department = require('../models/Department');
 const { classifyComplaint, detectDefconLevel, findBestOfficer, generateComplaintId } = require('../services/classifier');
+const { analyzeComplaintAuthenticity } = require('../services/aiAgent');
 const { sendComplaintConfirmation, sendDefconAlert, sendCitizenVerification } = require('../services/sms');
 const { notifyNewComplaint, notifyDefconAlert, notifyComplaintUpdate } = require('../services/notifications');
 const mongoose = require('mongoose');
@@ -83,6 +84,9 @@ exports.fileComplaint = async (req, res) => {
     const slaHours = defcon.sla_hours.resolution;
     const slaDeadline = new Date(Date.now() + slaHours * 3600000);
 
+    // 5.5. Run AI Authenticity & Fraud Detection Agent
+    const aiAnalysis = analyzeComplaintAuthenticity(complaint_text, media_urls || [], location || {});
+
     // 6. Create complaint
     const complaint = await Complaint.create({
       complaint_id,
@@ -100,12 +104,19 @@ exports.fileComplaint = async (req, res) => {
       sla_deadline: slaDeadline,
       status: officer ? 'ASSIGNED' : 'FILED',
       source: source || 'web',
+      ai_analysis: aiAnalysis,
       timeline: [
         {
           event: 'Complaint filed',
           actor_id: req.user._id,
           actor_role: req.user.role,
           note: `Filed via ${source || 'web'}`,
+          timestamp: new Date(),
+        },
+        {
+          event: 'AI Authenticity Verification',
+          actor_role: 'ai_agent',
+          note: `Verdict: ${aiAnalysis.verdict}, Fraud Risk: ${aiAnalysis.fraud_probability}%, Authenticity Score: ${aiAnalysis.authenticity_score}%. Flags: ${aiAnalysis.flags.length > 0 ? aiAnalysis.flags.join(', ') : 'None'}`,
           timestamp: new Date(),
         },
         ...(officer ? [{
@@ -235,6 +246,63 @@ exports.listComplaints = async (req, res) => {
 
     const total = await Complaint.countDocuments(filter);
 
+    // Calculate status counts for filtering dropdown dynamically (excluding the status filter itself)
+    const countFilter = {};
+    switch (req.user.role) {
+      case 'citizen':
+        countFilter.citizen_id = req.user._id;
+        break;
+      case 'officer':
+        countFilter.assigned_officer_id = req.user._id;
+        break;
+      case 'department_manager':
+      case 'nodal_officer':
+      case 'commissioner':
+        if (req.user.department) countFilter.department_id = req.user.department;
+        break;
+      case 'district_officer':
+        if (req.user.district) {
+          countFilter['location.district'] = req.user.district.toLowerCase().replace(/\s+/g, '_');
+        }
+        break;
+    }
+    if (priority) countFilter.priority = priority;
+    if (district) countFilter['location.district'] = district.toLowerCase().replace(/\s+/g, '_');
+    if (category) countFilter.category = category;
+    if (department) {
+      if (mongoose.Types.ObjectId.isValid(department)) {
+        countFilter.department_id = department;
+      } else {
+        const dept = await Department.findOne({ code: { $regex: new RegExp('^' + department + '$', 'i') } });
+        if (dept) {
+          countFilter.department_id = dept._id;
+        }
+      }
+    }
+    if (search) {
+      countFilter.$or = [
+        { complaint_id: { $regex: search, $options: 'i' } },
+        { complaint_text: { $regex: search, $options: 'i' } },
+        { 'location.address': { $regex: search, $options: 'i' } },
+        { category: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const statusCountsAgg = await Complaint.aggregate([
+      { $match: countFilter },
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
+
+    const statusCounts = {};
+    let totalAll = 0;
+    statusCountsAgg.forEach(item => {
+      if (item._id) {
+        statusCounts[item._id.toUpperCase()] = item.count;
+        totalAll += item.count;
+      }
+    });
+    statusCounts.ALL = totalAll;
+
     res.json({
       complaints,
       pagination: {
@@ -243,6 +311,7 @@ exports.listComplaints = async (req, res) => {
         total,
         pages: Math.ceil(total / parseInt(limit)),
       },
+      statusCounts,
     });
   } catch (err) {
     console.error('List complaints error:', err);
@@ -325,6 +394,53 @@ exports.updateStatus = async (req, res) => {
     res.json({ success: true, complaint });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update status' });
+  }
+};
+
+// Assign complaint to an officer
+exports.assignComplaint = async (req, res) => {
+  try {
+    const { officerId } = req.body;
+    if (!officerId) return res.status(400).json({ error: 'Officer ID is required' });
+
+    const complaint = await Complaint.findOne(getQueryByIdOrComplaintId(req.params.id));
+    if (!complaint) return res.status(404).json({ error: 'Complaint not found' });
+
+    const officer = await User.findById(officerId);
+    if (!officer || officer.role !== 'officer') {
+      return res.status(400).json({ error: 'Invalid officer ID' });
+    }
+
+    const prevOfficerId = complaint.assigned_officer_id;
+    complaint.assigned_officer_id = officer._id;
+    if (['FILED', 'PENDING_ASSIGN'].includes(complaint.status)) {
+      complaint.status = 'ASSIGNED';
+    }
+
+    // Record in timeline
+    complaint.timeline.push({
+      event: prevOfficerId ? 'Reassigned to Field Officer' : 'Assigned to Field Officer',
+      actor_id: req.user._id,
+      actor_role: req.user.role,
+      note: `Assigned to ${officer.name} (${officer.officer_profile?.designation || 'Field Officer'}).`,
+      timestamp: new Date()
+    });
+
+    // Update active complaints count for officers
+    if (prevOfficerId && prevOfficerId.toString() !== officer._id.toString()) {
+      await User.findByIdAndUpdate(prevOfficerId, { $inc: { 'officer_profile.active_complaints_count': -1 } });
+    }
+    if (!prevOfficerId || prevOfficerId.toString() !== officer._id.toString()) {
+      await User.findByIdAndUpdate(officer._id, { $inc: { 'officer_profile.active_complaints_count': 1 } });
+    }
+
+    await complaint.save();
+    await notifyComplaintUpdate(complaint);
+
+    res.json({ success: true, complaint });
+  } catch (err) {
+    console.error('Assign complaint error:', err);
+    res.status(500).json({ error: 'Failed to assign complaint' });
   }
 };
 

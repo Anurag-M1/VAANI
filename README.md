@@ -100,6 +100,142 @@
 
 ---
 
+## 🤖 Vigilant AI Detection & Authenticity Verification Agent
+
+To combat spam, fraud, and maintain extreme data integrity, VAANI is equipped with a state-of-the-art **Vigilant AI Detection & Authenticity Verification Agent** that scans every complaint and piece of evidence upon submission.
+
+### 🔍 How the AI Agent Works
+When a citizen files a complaint, the AI agent performs real-time heuristic, NLP, and metadata checks:
+
+1. **Complaint Fraud & Spam Detection**: Runs NLP classifiers to inspect text density, repeated character sequences, and a dictionary of test/fake indicators (e.g., gibberish, "asdf", mock text). If flagged, it calculates a **Spam/Fraud Probability Score**.
+2. **Evidence Authenticity & GPS Verification**: Inspects uploaded media metadata. It parses EXIF coordinates and cross-references them with the citizen's declared location coords. If the photo's location is more than 1 kilometer away, it triggers an `EVIDENCE_LOCATION_MISMATCH` flag.
+3. **Stock & Downloaded Image Analysis**: Checks file signatures and name queries for common stock image markers (e.g., preview, stock, download).
+4. **Automated AI Verdict**: Assigns a verdict (`PASSED`, `WARNING`, `FAILED`). FAILED complaints are automatically marked as suspicious and flagged for special manual review.
+
+The AI Agent results are stored directly in the `ai_analysis` schema, visible in the complaint's immutable timeline:
+* **Verdict**: `PASSED` / `WARNING` / `FAILED`
+* **Fraud Probability**: `0% - 100%`
+* **Authenticity Score**: `0% - 100%`
+* **Detected Flags**: `SPAM_KEYWORDS_DETECTED`, `EXIF_DATA_STRIPPED`, `EVIDENCE_LOCATION_MISMATCH`, etc.
+
+---
+
+## 🏆 VAANI Hero Features Matrix
+
+Here is the complete catalog of VAANI's state-of-the-art modules and components that make it the ultimate mission control network:
+
+### 1. Core Governance & Closure Engines
+* **False Closure Detection Engine**: Prevents field officers from closing complaints prematurely by analyzing text similarity in resolution notes, checking for copy-pasted templates, and flagging after-hours resolutions.
+* **Citizen Verification Before Closure**: Before a complaint is marked as closed, the citizen must verify the resolution via the citizen portal or a dynamic OTP verification workflow.
+* **CM Executive Dashboard**: High-level visual interface for the Chief Minister with real-time KPI counters, DEFCON alerts, and critical alerts.
+* **Commissioner Dashboard**: Isolation dashboard for the municipal commissioner to monitor all active issues across MCD departments.
+* **District Officer Dashboard**: Magisterial portal for district magistrates to review all complaints raised in their respective jurisdictions.
+* **Department-Specific Dashboards**: Custom portals for the 12 active departments (MCD, DJB, PWD, etc.) to manage their respective queues.
+* **Live Governance Command Center**: Direct web sockets command center showing complaint feeds, incoming alerts, and real-time SLA metrics.
+* **CM Visit Intelligence Mode**: A dedicated mode showing geo-coordinates, nearby complaints, and visit logs for the Chief Minister's ground inspection tours.
+* **Nearby Complaints Discovery**: Automatically groups and finds active complaints within 500m of a specified location for inspection planning.
+* **Visit Logs & Field Inspection Tracking**: Logs visits made by inspectors with geo-tagged logs and before/after verification details.
+* **Emergency War Room Dashboard**: Activated during critical events to coordinate disaster relief, water crisis, or power grid failures.
+* **Chief Minister Mission Control Center**: Central system combining command dashboards, digital twins, and direct directive overrides.
+* **Mobile CM Companion Dashboard**: Responsive companion views optimized for mobile screens during live transit.
+
+### 2. AI & Machine Learning Intelligence
+* **AI Auto Complaint Classification**: Auto-determines the correct department for a complaint using an N-Gram keyword-weight NLP classifier.
+* **AI Auto Routing Engine**: Automatically assigns the complaint to the most optimal field officer in the correct district and department based on current queue load.
+* **AI Priority Prediction**: Instantly flags DEFCON-level emergencies (e.g. electrocution risk, collapsed flyovers) to bypass regular queues.
+* **Complaint Severity Scoring**: Analyzes risk and urgency factors to assign priority scores (DEFCON Red to Green).
+* **Complaint Escalation Prediction**: Predicts if an issue will breach its SLA based on historical officer resolution speed and queue density.
+* **Predictive Governance Engine**: Anticipates bottleneck periods and projects future complaint patterns.
+* **Early Warning System**: Identifies spike trends in specific zones (e.g. sudden water contamination reports in Shahdara).
+* **Citizen Sentiment Analysis**: Scans feedback text ratings and reviews to calculate citizen satisfaction indexes and department satisfaction scores.
+* **AI Governance Recommendation Engine**: Recommends administrative optimizations and reallocation of personnel to underperforming zones.
+* **Governance Insights Assistant**: Generates readable summaries of weekly district activity and recommendations.
+* **AI-Powered Decision Support System**: Auto-suggests solutions and standard operational procedures (SOPs) to field officers.
+
+### 3. Performance, Metrics & Accountability
+* **Governance Score Engine**: Computes daily health cards for all 11 districts and 12 departments.
+* **Citizen Trust Index**: Tracking metric based on historical citizen ratings and resolved-to-disputed ratios.
+* **City Health Score**: Unified index reflecting the overall municipal functioning state of NCT of Delhi.
+* **District Health Score**: Comparative rating for all 11 districts of Delhi.
+* **Department Performance Ranking**: Live leaderboard comparing departments (e.g., BSES vs DJB) on SLA compliance and resolution speed.
+* **Officer Performance Ranking**: Leaderboard for field staff based on credibility scores, speed, and positive ratings.
+* **SLA Breach Command Center**: Direct view for DMs and CM to track all pending tasks that have violated their SLA timeline.
+* **Escalation Management Engine**: Handles the automated promotion of complaints to DMs (Level 1) or the CM War Room (Level 2) on SLA breaches.
+* **Officer Workload Intelligence**: Monitors the number of active cases assigned to each officer to prevent burnout.
+* **Resource Capacity Intelligence**: Helps planners see if department staffing levels match local complaint volume.
+* **Public Impact Score**: Weights complaints by population density and type of issue (e.g. commercial area water pipe burst vs private line leak).
+* **Complaint Trend Analytics**: Tracks month-on-month increases or decreases in complaint filings.
+* **Reopened Complaint Analytics**: Monitors cases that were closed but disputed by citizens to identify low-quality resolutions.
+* **Root Cause Analytics**: Segregates complaints by sub-categories to find chronic infrastructural problems.
+* **Department Accountability Dashboard**: A performance scorecard view highlighting SLA breach ratios and open disputes.
+* **Officer Accountability Dashboard**: Tracks individual officer metrics including average resolution time and verification dispute history.
+* **Dynamic KPI Engine**: Updates counters (Total Filed, Pending, Resolved, SLA Breached) on all dashboards instantly.
+* **Real-Time Analytics Engine**: Aggregates MongoDB database changes into frontend charts using live-updating Socket.io feeds.
+* **Officer Bandwidth Monitoring**: Displays real-time dashboard grids of active vs maximum limits for field staff.
+* **Complaint Aging Analysis**: Breaks down pending cases into time-buckets (e.g., <24h, 1-3 days, 3-7 days, >7 days).
+* **SLA Forecasting Engine**: Predicts expected completion times for ongoing works.
+* **Department Benchmarking Engine**: Side-by-side performance comparisons of agencies.
+* **Governance Performance Trends**: Historical charts showing long-term trends in resolution times.
+* **Historical Governance Intelligence**: Accesses archived snapshots to compare current seasons with previous years.
+* **Officer Response Time Intelligence**: Computes average hours taken from complaint assignment to field arrival.
+* **Resolution Quality Scoring**: Combined evaluation based on citizen feedback and photo validation.
+* **Public Service Performance Index**: General standard index for public service delivery efficiency.
+* **Governance Maturity Index**: Audits the digitisation level and automation efficiency of NCT departments.
+
+### 4. GIS & Spatial Intelligence
+* **Complaint Hotspot Intelligence**: Identifies spatial clusters of complaints to isolate systemic infrastructure failures.
+* **Ward-Level Heatmaps**: Zoomable GIS maps showing density details at local ward levels.
+* **District-Level Heatmaps**: Colored district overlays demonstrating geographic performance.
+* **City-Wide Heatmaps**: Interactive SVG maps representing the overall complaint density across Delhi.
+* **Delhi Digital Twin Map**: Virtual layout rendering physical complaints directly on coordinate maps.
+* **GIS-Based Complaint Visualization**: Plots active complaints as color-coded pins based on coordinate telemetry.
+* **Complaint Density Mapping**: Renders localized heat signatures.
+* **Geo-Fencing Based Alerts**: Notifies nearby field staff when a new complaint is filed within their geo-fenced region.
+
+### 5. Real-time Incident & Disaster Management
+* **Critical Incident Detection**: Auto-detects emergency text inputs and triggers instant war-room SMS alerts.
+* **High-Risk Area Detection**: Flags geographical zones showing recurring hazards (e.g. dangling live wires or open sewers).
+* **Infrastructure Failure Detection**: Flags catastrophic failures (e.g., complete grid blackout or main pipeline burst).
+* **Flood Risk Intelligence**: Aggregates drainage/waterlogging reports during monsoon to warn disaster response.
+* **Water Crisis Intelligence**: Highlights severe water shortage reports.
+* **Power Outage Intelligence**: Maps substation outages based on street light and BSES complaint clusters.
+* **Sanitation Risk Intelligence**: Flags garbage dumping spots near schools or hospitals.
+* **Road Infrastructure Intelligence**: Highlights cave-ins and damaged bridges.
+
+### 6. Multi-Department Coordination & Lifecycle
+* **Duplicate Complaint Clustering**: Detects and links multiple filings about the same local issue (e.g. 5 citizens reporting the same pothole).
+* **Real-Time Complaint Tracking**: Follows every state change with instant dashboard notifications.
+* **Complaint Lifecycle Monitoring**: Fully audits the workflow from filing to closure.
+* **Multi-Department Coordination Engine**: Connects MCD and PWD when issues overlap (e.g. road excavation for sewer line laying).
+* **Cross-Department Complaint Linking**: Links related cases for unified tracking.
+* **Master Issue Management**: Allows resolving a parent issue to auto-resolve all linked child complaints.
+* **VIP/Emergency Escalation Engine**: Fast-tracks matters affecting vital infrastructure, hospitals, or transit routes.
+* **Critical Complaint Fast Track Lane**: Bypasses regular queues to assign emergency complaints in under 2 minutes.
+
+### 7. Citizen Portals, Communication & Channels
+* **Social Media Complaint Aggregator**: Simulates fetching and mapping complaints filed on platforms like X/Twitter.
+* **WhatsApp Complaint Intake**: Integrates WhatsApp intake pipelines.
+* **Email Complaint Intake**: Auto-processes incoming emails into formal tickets.
+* **Unified Citizen Complaint Feed**: Merges inputs from all channels (web, WhatsApp, etc.) into a single, clean workspace.
+* **Citizen Satisfaction Analytics**: Aggregates rating indices across demographics.
+* **Smart Notification Center**: Delivers precise notifications to citizens via email, SMS, and dashboard updates.
+* **Real-Time Alert Center**: Alert hub on dashboards showing instant popups for DEFCON occurrences.
+* **Public Transparency Dashboard**: Public-facing portal detailing resolution metrics and performance scorecards.
+* **Citizen Resolution Timeline**: Clear, bilingual status timeline accessible by citizens.
+* **Open Data & Reporting Engine**: Exposes anonymized complaint datasets for researchers.
+* **Citizen Engagement Analytics**: Measures citizen participation rates.
+
+### 8. Reporting & Auditing Systems
+* **Audit Trail System**: Logs every action (assignment, notes, verification, closure) with actor name and timestamp.
+* **Immutable Activity Timeline**: An un-editable log embedded in every complaint.
+* **Geo-Tagged Resolution Verification**: Restricts resolving complaints unless photo evidence has matching GPS coordinate proof.
+* **Before/After Evidence Verification**: Shows side-by-side photo comparisons.
+* **CM Daily Brief Generator**: Automatically compiles a clean summary of daily statistics for the CMO.
+* **Automated Governance Reports**: Regularly generates PDF/CSV reports.
+* **Executive PDF Report Generator**: Generates high-quality PDF printouts of district analytics.
+
+---
+
 ## 🏗️ System Architecture
 
 ```

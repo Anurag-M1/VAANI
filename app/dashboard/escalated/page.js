@@ -169,7 +169,7 @@ export default function EscalatedPage() {
                   {complaint.cm_directive && (
                     <div style={{ marginTop: 'var(--space-4)', padding: 'var(--space-3)', background: 'var(--color-primary-surface)', borderLeft: '3px solid var(--color-primary)', borderRadius: 'var(--radius-sm)' }}>
                       <strong>🏛️ CM Directive Issued:</strong>
-                      <p style={{ margin: '4px 0 0 0', fontStyle: 'italic' }}>"{complaint.cm_directive}"</p>
+                      <p style={{ margin: '4px 0 0 0', fontStyle: 'italic' }}>&ldquo;{complaint.cm_directive}&rdquo;</p>
                     </div>
                   )}
                 </div>
