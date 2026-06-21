@@ -17,6 +17,7 @@ export function setToken(token) {
   accessToken = token;
   if (typeof window !== 'undefined') {
     localStorage.setItem('vaani_token', token);
+    document.cookie = `vaani_token=${token}; path=/; max-age=86400; SameSite=Lax`;
   }
 }
 
@@ -26,6 +27,7 @@ export function clearToken() {
     localStorage.removeItem('vaani_token');
     localStorage.removeItem('vaani_refresh');
     localStorage.removeItem('vaani_user');
+    document.cookie = 'vaani_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0';
   }
 }
 

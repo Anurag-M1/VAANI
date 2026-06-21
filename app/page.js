@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, setToken, setStoredUser, initAuth } from './lib/api';
 
@@ -20,7 +20,51 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [otpSent, setOtpSent] = useState(false);
+  const [isSubdomainEnforced, setIsSubdomainEnforced] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramSubdomain = urlParams.get('subdomain');
+      let subdomain = paramSubdomain || '';
+
+      if (!subdomain) {
+        const parts = hostname.split('.');
+        if (parts.length > 2 && parts[0] !== 'www') {
+          subdomain = parts[0];
+        } else if (parts.length > 1 && hostname.includes('localhost') && parts[0] !== 'localhost') {
+          subdomain = parts[0];
+        }
+      }
+
+      subdomain = subdomain.toLowerCase();
+
+      // Auto-configure roles based on subdomain
+      if (subdomain === 'citizen') {
+        setSelectedRole('citizen');
+        setPhone('+91 9800000020'); // Auto-fill default citizen demo phone
+        setIsSubdomainEnforced(true);
+      } else if (subdomain === 'officer') {
+        setSelectedRole('officer');
+        setPhone('+91 9999000005'); // Auto-fill default officer demo phone
+        setIsSubdomainEnforced(true);
+      } else if (subdomain === 'cm') {
+        setSelectedRole('cm');
+        setPhone('+91 9999000001'); // Auto-fill CM phone
+        setIsSubdomainEnforced(true);
+      } else if (subdomain === 'dm') {
+        setSelectedRole('district_officer');
+        setPhone('+91 9999000003'); // Auto-fill DM phone
+        setIsSubdomainEnforced(true);
+      } else if (subdomain === 'dept') {
+        setSelectedRole('department_manager');
+        setPhone('+91 9999000004'); // Auto-fill Dept phone
+        setIsSubdomainEnforced(true);
+      }
+    }
+  }, []);
 
   const handlePhoneChange = (e) => {
     let input = e.target.value;
@@ -168,33 +212,55 @@ export default function LoginPage() {
         {/* Step 1: Role Selection */}
         {step === 'role' && (
           <>
-            <div style={{ marginBottom: 'var(--space-6)' }}>
-              <p style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 'var(--space-4)', textAlign: 'center' }}>
-                Select Role / भूमिका चुनें
-              </p>
-              <div className="login-role-grid">
-                {roles.map(role => (
-                  <button
-                    key={role.id}
-                    className={`login-role-btn ${selectedRole === role.id ? 'active' : ''}`}
-                    onClick={() => {
-                      setSelectedRole(role.id);
-                      const formattedPhone = role.phone.startsWith('+91') && !role.phone.startsWith('+91 ')
-                        ? '+91 ' + role.phone.slice(3)
-                        : role.phone;
-                      setPhone(formattedPhone);
-                    }}
-                    id={`role-${role.id}`}
-                  >
-                    <span className="login-role-icon">{role.icon}</span>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }} className="login-role-text-container">
-                      <span className="login-role-label">{role.label}</span>
-                      <span className="login-role-label-hi">{role.labelHi}</span>
-                    </div>
-                  </button>
-                ))}
+            {!isSubdomainEnforced ? (
+              <div style={{ marginBottom: 'var(--space-6)' }}>
+                <p style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 'var(--space-4)', textAlign: 'center' }}>
+                  Select Role / भूमिका चुनें
+                </p>
+                <div className="login-role-grid">
+                  {roles.map(role => (
+                    <button
+                      key={role.id}
+                      className={`login-role-btn ${selectedRole === role.id ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedRole(role.id);
+                        const formattedPhone = role.phone.startsWith('+91') && !role.phone.startsWith('+91 ')
+                          ? '+91 ' + role.phone.slice(3)
+                          : role.phone;
+                        setPhone(formattedPhone);
+                      }}
+                      id={`role-${role.id}`}
+                    >
+                      <span className="login-role-icon">{role.icon}</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }} className="login-role-text-container">
+                        <span className="login-role-label">{role.label}</span>
+                        <span className="login-role-label-hi">{role.labelHi}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div style={{
+                textAlign: 'center',
+                padding: 'var(--space-3) var(--space-4)',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid var(--color-border-light)',
+                borderRadius: 'var(--radius-md)',
+                marginBottom: 'var(--space-6)',
+                backdropFilter: 'blur(8px)',
+              }}>
+                <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '8px' }}>
+                  {roles.find(r => r.id === (selectedRole === 'district_officer' ? 'district_officer' : selectedRole === 'department_manager' ? 'department_manager' : selectedRole))?.icon || '🏛️'}
+                </span>
+                <span style={{ fontWeight: 700, fontSize: 'var(--text-lg)', color: 'var(--color-primary)', display: 'block' }}>
+                  {roles.find(r => r.id === (selectedRole === 'district_officer' ? 'district_officer' : selectedRole === 'department_manager' ? 'department_manager' : selectedRole))?.label} Access Portal
+                </span>
+                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
+                  {roles.find(r => r.id === (selectedRole === 'district_officer' ? 'district_officer' : selectedRole === 'department_manager' ? 'department_manager' : selectedRole))?.labelHi} अधिकृत लॉगिन
+                </span>
+              </div>
+            )}
 
             {/* OTP Login Form */}
             <form onSubmit={handleSendOTP}>
