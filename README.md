@@ -14,7 +14,19 @@
 
 **A state-of-the-art, real-time grievance redressal and war room dashboard for the Government of NCT of Delhi.**
 
-[🔴 Live Demo](#) &nbsp;|&nbsp; [📖 Documentation](#-table-of-contents) &nbsp;|&nbsp; [🚀 Deploy to Vercel](#-deployment-guide)
+### 🌐 Live Production Portals
+
+| Portal | Live URL | Access Role | Default Demo Mobile |
+| :--- | :--- | :--- | :--- |
+| **🏠 Citizen Portal** | [citizen.vaani.site](https://citizen.vaani.site) | Citizen Filing & Tracking | `+91 9800000020` |
+| **🏛️ CM War Room** | [cm.vaani.site](https://cm.vaani.site) | Chief Minister View | `+91 9999000001` |
+| **🏢 DM Portal** | [dm.vaani.site](https://dm.vaani.site) | District Magistrate View | `+91 9999000003` |
+| **📋 Dept Manager** | [dept.vaani.site](https://dept.vaani.site) | MCD / DJB Agency Manager | `+91 9999000004` |
+| **👷 Officer Queue** | [officer.vaani.site](https://officer.vaani.site) | Field Resolution Queue | `+91 9999000005` |
+| **📡 Main Domain** | [vaani.site](https://vaani.site) | Global Landing Page | — |
+| **📡 Backend API** | [vaani-ne3t.onrender.com](https://vaani-ne3t.onrender.com/api/health) | Live Health Endpoint | — |
+
+*All demo accounts bypass actual SMS routing in demo mode via verification OTP: **`123456`***
 
 ---
 
@@ -22,40 +34,22 @@
 
 ## 📺 Demo Video
 
-> 🎬 **Click below to watch the full system walkthrough**
+> 🎬 **System Walkthrough & Demonstration**
 
-<!-- VIDEO PLACEHOLDER — Replace with your YouTube/Loom embed link -->
-[![VAANI Demo Video](https://img.shields.io/badge/▶_Watch_Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](#)
-
-```
-📌 Place your demo video link here.
-   Example: [![Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://youtube.com/watch?v=YOUR_VIDEO_ID)
-```
+*Video walkthrough placeholder. Replace this section with your recording embed when available.*
 
 ---
 
-## 📸 Screenshots
+## 📸 System Screenshots
 
-> 🖼️ **System Panel Overview**
+> 🖼️ **Side-by-Side Visual Overview (Desktop & Responsive Mobile)**
 
-<!-- SCREENSHOT PLACEHOLDER — Add your screenshots below -->
-| Panel | Screenshot |
-|-------|-----------|
-| 🔴 CM War Room Dashboard | ![CM Dashboard](docs/screenshots/cm_dashboard.png) |
-| 🗺️ Delhi District Heatmap | ![Heatmap](docs/screenshots/heatmap.png) |
-| 📊 Analytics & Reports | ![Analytics](docs/screenshots/analytics.png) |
-| 🚨 DEFCON Critical Alerts | ![Critical](docs/screenshots/defcon_alerts.png) |
-| 👤 Citizen Portal | ![Citizen](docs/screenshots/citizen_portal.png) |
-| 🏗️ DM District Panel | ![DM Panel](docs/screenshots/dm_panel.png) |
-| 🏢 Department Manager Panel | ![Dept Panel](docs/screenshots/dept_panel.png) |
-| 👷 Field Officer Dashboard | ![Officer](docs/screenshots/officer_dashboard.png) |
-| 📋 Complaint Detail Page | ![Complaint](docs/screenshots/complaint_detail.png) |
-| ⏱️ Timeline & Closure Flow | ![Timeline](docs/screenshots/timeline_closure.png) |
-
-```
-📌 Create a /docs/screenshots/ folder and add your screenshots there.
-   Recommended resolution: 1920×1080 or 1280×800 (WebP or PNG)
-```
+| Desktop View | Mobile View | Description |
+| :--- | :--- | :--- |
+| ![CM War Room](public/screenshots/cm_desktop.png) | ![CM Mobile](public/screenshots/cm_mobile.png) | **CM War Room & DEFCON Alerts** |
+| ![Citizen Portal](public/screenshots/citizen_desktop.png) | ![Citizen Mobile](public/screenshots/citizen_mobile.png) | **Citizen Registration & Filing** |
+| ![Officer Queue](public/screenshots/officer_desktop.png) | ![Officer Mobile](public/screenshots/officer_mobile.png) | **Field Officer Resolution Queue** |
+| ![Heatmap](public/screenshots/heatmap_desktop.png) | ![Heatmap Mobile](public/screenshots/heatmap_mobile.png) | **Delhi GIS Heatmap & Hotspots** |
 
 ---
 
