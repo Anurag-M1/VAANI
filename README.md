@@ -719,31 +719,34 @@ Use **OTP: `123456`** for all demo accounts, or click the **Quick Demo Access** 
 
 ## 🌐 Deployment Guide
 
-### Option 1: Vercel + Railway (Recommended)
+### Option 1: Vercel (Frontend) + Render (Backend) (Recommended)
 
-This is the easiest zero-config deployment option.
+This is the recommended strategy for production deployment:
+- **Vercel** hosts the Next.js frontend (with support for edge middleware and subdomains).
+- **Render** hosts the Express backend as a persistent service (required for Socket.io and background Cron Jobs).
 
-#### Deploy Backend to Railway
+#### Set Up MongoDB Atlas (Cloud Database)
 
-1. Go to [railway.app](https://railway.app) and sign in with GitHub
-2. Click **"New Project"** → **"Deploy from GitHub repo"**
-3. Select your repository and choose the `backend/` folder
-4. Add environment variables in Railway dashboard:
-   ```
-   PORT=5001
-   MONGODB_URI=<your-mongodb-atlas-uri>
-   JWT_SECRET=<strong-random-secret>
-   REFRESH_TOKEN_SECRET=<strong-random-secret>
-   DEMO_MODE=true
-   ```
-5. Copy the **Railway deployment URL** (e.g., `https://vaani-backend.up.railway.app`)
+1. Sign up/log in at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) and create a free M0 cluster.
+2. Create a database user and under **Network Access** whitelist IP `0.0.0.0/0` (allowing Render & Vercel to connect).
+3. Copy your connection string: `mongodb+srv://<username>:<password>@cluster0.xxxx.mongodb.net/vaani`.
 
-#### Set Up MongoDB Atlas
+#### Deploy Backend to Render
 
-1. Go to [mongodb.com/atlas](https://mongodb.com/atlas) and create a free cluster
-2. Create a database user and whitelist `0.0.0.0/0` (all IPs) for Railway access
-3. Copy the connection string: `mongodb+srv://user:pass@cluster.mongodb.net/vaani`
-4. Set it as `MONGODB_URI` in Railway
+1. Go to [Render](https://render.com) and log in with GitHub.
+2. Click **New +** ➔ **Web Service**.
+3. Select your repository and configure the service:
+   - **Root Directory**: `backend` (Important: points to the backend subdirectory)
+   - **Runtime**: `Node`
+   - **Build Command**: `npm install`
+   - **Start Command**: `node src/server.js`
+4. Add the following Environment Variables:
+   - `PORT` = `10000`
+   - `MONGODB_URI` = `<your-mongodb-atlas-uri>`
+   - `JWT_SECRET` = `<strong-jwt-secret>`
+   - `JWT_REFRESH_SECRET` = `<strong-refresh-secret>`
+   - `DEMO_MODE` = `true`
+5. Click **Deploy Web Service** and copy your Render service URL (e.g., `https://vaani-backend.onrender.com`).
 
 #### Deploy Frontend to Vercel (with Subdomains)
 
@@ -752,8 +755,8 @@ This is the easiest zero-config deployment option.
 3. Set **Root Directory** to `/` (the Next.js root).
 4. Add the following environment variables:
    ```env
-   NEXT_PUBLIC_API_URL=https://vaani-backend.up.railway.app/api
-   NEXT_PUBLIC_SOCKET_URL=https://vaani-backend.up.railway.app
+   NEXT_PUBLIC_API_URL=https://vaani-backend.onrender.com/api
+   NEXT_PUBLIC_SOCKET_URL=https://vaani-backend.onrender.com
    NEXT_PUBLIC_DEMO_MODE=true
    ```
 5. Click **Deploy**.
