@@ -270,6 +270,16 @@ h6 { font-size: var(--text-base); }
   display: none;
 }
 
+.sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--color-text-inverse);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: var(--space-2);
+}
+
 .app-main {
   flex: 1;
   margin-left: var(--sidebar-width);
@@ -1585,6 +1595,10 @@ h6 { font-size: var(--text-base); }
     width: 280px;
   }
 
+  .sidebar-close-btn {
+    display: block;
+  }
+
   .app-sidebar.open {
     transform: translateX(0);
   }
@@ -1693,6 +1707,20 @@ h6 { font-size: var(--text-base); }
   .btn {
     min-height: 48px;
     font-size: var(--text-sm);
+  }
+
+  .search-bar {
+    max-width: 130px;
+  }
+
+  .chart-bar-label {
+    width: 80px;
+    font-size: var(--text-xs);
+  }
+
+  .chart-bar-value {
+    width: 45px;
+    font-size: var(--text-xs);
   }
 }
 
@@ -2124,3 +2152,230 @@ h6 { font-size: var(--text-base); }
 .relative { position: relative; }
 .flex-1 { flex: 1; }
 .flex-wrap { flex-wrap: wrap; }
+
+/* ============================================
+   PODIUM & LEADERBOARD RESPONSIVENESS
+   ============================================ */
+.podium-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+  padding: var(--space-6) 0;
+}
+
+.podium-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  max-width: 200px;
+}
+
+.podium-medal {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-2);
+}
+
+.podium-name {
+  font-weight: 800;
+  font-size: var(--text-base);
+  text-align: center;
+  margin-bottom: 2px;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.podium-sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-bottom: var(--space-3);
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.podium-block {
+  width: 100%;
+  height: var(--pos-height);
+  background: linear-gradient(180deg, var(--pos-color)40 0%, var(--pos-color)20 100%);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--pos-color)60;
+  border-bottom: none;
+}
+
+.podium-score {
+  font-size: var(--text-2xl);
+  font-weight: 900;
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 768px) {
+  .podium-container {
+    gap: var(--space-3);
+  }
+  .podium-name {
+    font-size: var(--text-sm);
+  }
+  .podium-score {
+    font-size: var(--text-lg);
+  }
+}
+
+@media (max-width: 580px) {
+  .podium-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+  .podium-step {
+    max-width: 100%;
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    background: var(--color-surface-hover);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+  }
+  .podium-medal {
+    font-size: 2rem;
+    margin-bottom: 0;
+    margin-right: var(--space-3);
+  }
+  .podium-name {
+    text-align: left;
+    font-size: var(--text-sm);
+    width: auto;
+    flex: 1;
+  }
+  .podium-sub {
+    display: none; /* Hide DM name/dept to fit on phone width row */
+  }
+  .podium-block {
+    width: auto;
+    height: auto !important;
+    background: none !important;
+    border: none !important;
+    border-radius: 0;
+    margin-left: auto;
+  }
+  .podium-score {
+    font-size: var(--text-base);
+    color: var(--color-text-primary);
+  }
+}
+
+/* ============================================
+   CITIZEN PORTAL TABS RESPONSIVENESS
+   ============================================ */
+.citizen-tabs {
+  display: flex;
+  margin-bottom: var(--space-8);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 4px;
+  border: 1px solid var(--color-border);
+}
+
+@media (max-width: 580px) {
+  .citizen-tabs {
+    flex-direction: column;
+    gap: var(--space-2);
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+}
+
+/* ============================================
+   RESPONSIVE MODAL ENHANCEMENTS
+   ============================================ */
+@media (max-width: 768px) {
+  .modal {
+    max-width: calc(100% - 2rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 0;
+  }
+  .modal {
+    max-width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-4);
+  }
+  .modal-header {
+    padding: var(--space-4);
+  }
+  .modal-footer {
+    padding: var(--space-4);
+  }
+}
+
+/* ============================================
+   NOTIFICATIONS DROPDOWN RESPONSIVENESS
+   ============================================ */
+.notifications-dropdown {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  width: 320px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xl);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  z-index: 1000;
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 850px) {
+  .notifications-dropdown {
+    right: auto;
+    left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .notifications-dropdown {
+    right: auto;
+    left: -20px;
+    width: 290px;
+  }
+}
+
+/* ============================================
+   TRACK SEARCH CONTAINER RESPONSIVENESS
+   ============================================ */
+.track-search-container {
+  display: flex;
+  gap: var(--space-3);
+}
+
+@media (max-width: 480px) {
+  .track-search-container {
+    flex-direction: column;
+  }
+  .track-search-container button {
+    width: 100%;
+  }
+}
+
+

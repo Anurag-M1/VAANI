@@ -267,12 +267,21 @@ export default function DashboardLayout({ children }) {
       {/* Sidebar */}
       <aside className={`app-sidebar ${sidebarOpen ? 'open' : ''}`}>
         {/* Brand */}
-        <div className="sidebar-brand">
-          <div className="sidebar-emblem">🏛️</div>
-          <div className="sidebar-brand-text">
-            <span className="sidebar-brand-title" style={{ letterSpacing: '2px', fontSize: 'var(--text-base)' }}>VAANI</span>
-            <span className="sidebar-brand-subtitle">शिकायत प्रबंधन प्रणाली</span>
+        <div className="sidebar-brand" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <div className="sidebar-emblem">🏛️</div>
+            <div className="sidebar-brand-text">
+              <span className="sidebar-brand-title" style={{ letterSpacing: '2px', fontSize: 'var(--text-base)' }}>VAANI</span>
+              <span className="sidebar-brand-subtitle">शिकायत प्रबंधन प्रणाली</span>
+            </div>
           </div>
+          <button 
+            className="sidebar-close-btn" 
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close navigation"
+          >
+            ✕
+          </button>
         </div>
 
         {/* Navigation */}
@@ -355,7 +364,7 @@ export default function DashboardLayout({ children }) {
                 <span className="search-bar-icon">🔍</span>
                 <input
                   type="text"
-                  placeholder="Search complaints by ID, text, area... / शिकायत खोजें..."
+                  placeholder="Search... / खोजें..."
                   id="global-search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}

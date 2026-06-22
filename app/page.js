@@ -244,11 +244,10 @@ export default function LoginPage() {
               <div style={{
                 textAlign: 'center',
                 padding: 'var(--space-3) var(--space-4)',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid var(--color-border-light)',
+                background: 'var(--color-primary-surface)',
+                border: '1px solid var(--color-border)',
                 borderRadius: 'var(--radius-md)',
                 marginBottom: 'var(--space-6)',
-                backdropFilter: 'blur(8px)',
               }}>
                 <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '8px' }}>
                   {roles.find(r => r.id === (selectedRole === 'district_officer' ? 'district_officer' : selectedRole === 'department_manager' ? 'department_manager' : selectedRole))?.icon || '🏛️'}

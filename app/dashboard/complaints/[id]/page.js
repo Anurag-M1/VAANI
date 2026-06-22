@@ -471,7 +471,7 @@ export default function ComplaintDetailPage() {
                       <span style={{ fontSize: 'var(--text-xs)', fontWeight: step.done ? 700 : 400, color: step.done ? 'var(--color-green)' : 'var(--color-text-muted)' }}>
                         {step.label}
                       </span>
-                      {i < 4 && <span style={{ color: 'var(--color-border)', margin: '0 4px' }}>→</span>}
+                      {i < 4 && <span className="hide-mobile" style={{ color: 'var(--color-border)', margin: '0 4px' }}>→</span>}
                     </div>
                   ))}
                 </div>

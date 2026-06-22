@@ -57,29 +57,21 @@ export default function LeaderboardPage() {
     const colors = ['#C0C0C0', '#FFD700', '#CD7F32'];
 
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 'var(--space-4)', marginBottom: 'var(--space-8)', padding: 'var(--space-6) 0' }}>
+      <div className="podium-container">
         {podiumOrder.map((idx, pos) => {
           const item = top3[idx];
           const name = type === 'districts' ? item.district : item.name;
           const score = type === 'districts' ? `${item.score || item.resolution_rate} pts` : `${item.officer_profile?.scorecard?.credibility_score || 0}/100`;
           const sub = type === 'districts' ? item.dm_name : (item.department?.name || 'Department');
           return (
-            <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, maxWidth: 200 }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: 'var(--space-2)' }}>{medals[idx]}</div>
-              <div style={{ fontWeight: 800, fontSize: 'var(--text-base)', textAlign: 'center', marginBottom: 2 }}>{name}</div>
-              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', textAlign: 'center', marginBottom: 'var(--space-3)' }}>{sub}</div>
-              <div style={{
-                width: '100%',
-                height: heights[pos],
-                background: `linear-gradient(180deg, ${colors[pos]}40 0%, ${colors[pos]}20 100%)`,
-                borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: `2px solid ${colors[pos]}60`,
-                borderBottom: 'none',
-              }}>
-                <span style={{ fontSize: 'var(--text-2xl)', fontWeight: 900, color: 'var(--color-text-primary)' }}>{score}</span>
+            <div key={idx} className="podium-step" style={{ '--pos-height': heights[pos], '--pos-color': colors[pos] }}>
+              <div className="podium-medal">{medals[idx]}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', width: '100%', minWidth: 0, flex: 1 }}>
+                <div className="podium-name">{name}</div>
+                <div className="podium-sub">{sub}</div>
+              </div>
+              <div className="podium-block">
+                <span className="podium-score">{score}</span>
               </div>
             </div>
           );

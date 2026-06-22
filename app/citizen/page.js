@@ -429,18 +429,7 @@ export default function CitizenPortal() {
                 </button>
 
                 {showNotifications && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '46px',
-                    right: 0,
-                    width: '320px',
-                    background: 'var(--color-surface)',
-                    boxShadow: 'var(--shadow-xl)',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--color-border)',
-                    zIndex: 1000,
-                    color: 'var(--color-text-primary)'
-                  }}>
+                  <div className="notifications-dropdown">
                     <div style={{
                       padding: 'var(--space-3) var(--space-4)',
                       borderBottom: '1px solid var(--color-border-light)',
@@ -528,11 +517,7 @@ export default function CitizenPortal() {
 
       <div style={{ maxWidth: 800, margin: '0 auto', padding: 'var(--space-8) var(--space-6)' }}>
         {/* Tab Toggle */}
-        <div style={{
-          display: 'flex', marginBottom: 'var(--space-8)',
-          background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)',
-          padding: 4, border: '1px solid var(--color-border)',
-        }}>
+        <div className="citizen-tabs">
           <button
             className={`btn ${activeTab === 'file' ? 'btn-primary' : 'btn-ghost'}`}
             style={{ flex: 1, borderRadius: 'var(--radius-md)' }}
@@ -593,7 +578,7 @@ export default function CitizenPortal() {
                   />
                 </div>
 
-                <div className="grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+                <div className="grid-2">
                   <div className="form-group">
                     <label className="form-label">Category / श्रेणी</label>
                     <select
@@ -690,9 +675,10 @@ export default function CitizenPortal() {
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          gap: 'var(--space-2)'
+                          gap: 'var(--space-2)',
+                          flexWrap: 'wrap'
                         }}>
-                          <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{ minWidth: 0, flex: '1 1 200px' }}>
                             <div style={{ fontWeight: 600, fontSize: 'var(--text-xs)', display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
                               <span>ID: {dc.complaint_id}</span>
                               <span className={`badge badge-${dc.status?.toLowerCase()}`} style={{ fontSize: '10px', padding: '2px 6px' }}>{dc.status}</span>
@@ -765,7 +751,7 @@ export default function CitizenPortal() {
                 <div className="card-title">🔍 Track Grievance Status</div>
               </div>
               <div className="card-body">
-                <form onSubmit={handleTrackSubmit} style={{ display: 'flex', gap: 'var(--space-3)' }}>
+                <form onSubmit={handleTrackSubmit} className="track-search-container">
                   <input
                     type="text"
                     className="form-input"
@@ -900,7 +886,7 @@ export default function CitizenPortal() {
                     <p style={{ margin: '4px 0 0 0', color: 'var(--color-text-secondary)' }}>{trackedComplaint.complaint_text}</p>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)', fontSize: 'var(--text-sm)', borderTop: '1px solid var(--color-border-light)', paddingTop: 'var(--space-3)' }}>
+                  <div className="grid-2" style={{ fontSize: 'var(--text-sm)', borderTop: '1px solid var(--color-border-light)', paddingTop: 'var(--space-3)' }}>
                     <div>📍 <strong>Address:</strong> {trackedComplaint.location?.address}</div>
                     <div>🏢 <strong>Department:</strong> {trackedComplaint.department_id?.name || 'MCD'}</div>
                   </div>

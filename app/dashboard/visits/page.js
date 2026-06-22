@@ -164,18 +164,13 @@ export default function VisitLogsPage() {
 
       {/* Plan Visit Modal */}
       {showModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)', zIndex: 1000,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 'var(--space-4)'
-        }}>
-          <div className="card" style={{ width: '100%', maxWidth: 500, boxShadow: 'var(--shadow-2xl)' }}>
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div className="card-title">📍 Log/Plan Inspection Visit</div>
-              <button className="btn btn-ghost" style={{ fontSize: '1.2rem', padding: 4 }} onClick={() => setShowModal(false)}>✖</button>
+        <div className="modal-overlay">
+          <div className="modal animate-fade-in">
+            <div className="modal-header">
+              <div className="modal-title">📍 Log/Plan Inspection Visit</div>
+              <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
             </div>
-            <div className="card-body">
+            <div className="modal-body">
               <form onSubmit={handlePlanVisit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                 <div>
                   <label className="form-label">Location / क्षेत्र</label>

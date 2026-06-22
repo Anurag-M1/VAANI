@@ -306,23 +306,18 @@ export default function OfficersPage() {
 
       {/* --- ADD OFFICER MODAL --- */}
       {isAddModalOpen && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)', zIndex: 1000,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 'var(--space-4)', backdropFilter: 'blur(3px)'
-        }}>
-          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 500, boxShadow: 'var(--shadow-2xl)' }}>
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div className="card-title">➕ Add New Field Officer</div>
+        <div className="modal-overlay">
+          <div className="modal animate-fade-in">
+            <div className="modal-header">
+              <div className="modal-title">➕ Add New Field Officer</div>
               <button 
                 onClick={() => setIsAddModalOpen(false)} 
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: 'var(--color-text-muted)' }}
+                className="modal-close"
               >
                 ✕
               </button>
             </div>
-            <div className="card-body">
+            <div className="modal-body">
               <form onSubmit={handleCreateOfficer} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                 <div className="form-group">
                   <label className="form-label">Full Name <span style={{ color: 'var(--priority-critical)' }}>*</span></label>
@@ -417,25 +412,20 @@ export default function OfficersPage() {
 
       {/* --- ASSIGN COMPLAINT MODAL --- */}
       {isAssignModalOpen && selectedOfficerForAssign && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)', zIndex: 1000,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 'var(--space-4)', backdropFilter: 'blur(3px)'
-        }}>
-          <div className="card animate-fade-in" style={{ width: '100%', maxWidth: 500, boxShadow: 'var(--shadow-2xl)' }}>
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div className="card-title">
+        <div className="modal-overlay">
+          <div className="modal animate-fade-in">
+            <div className="modal-header">
+              <div className="modal-title">
                 📋 Assign Case to {selectedOfficerForAssign.name}
               </div>
               <button 
                 onClick={() => setIsAssignModalOpen(false)} 
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: 'var(--color-text-muted)' }}
+                className="modal-close"
               >
                 ✕
               </button>
             </div>
-            <div className="card-body">
+            <div className="modal-body">
               <form onSubmit={handleAssignSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                 <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
                   Select an active unassigned or disputed complaint to assign to this officer.
