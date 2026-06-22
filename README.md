@@ -36,7 +36,7 @@
 
 > 🎬 **System Walkthrough & Demonstration**
 
-*Video walkthrough placeholder. Replace this section with your recording embed when available.*
+https://github.com/user-attachments/assets/2e8cd175-9702-4863-9bd9-64b255a1e101
 
 ---
 
