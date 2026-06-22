@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/vaani-banner.png" alt="VAANI Banner" width="100%" />
+<img width="1462" height="833" alt="1" src="https://github.com/user-attachments/assets/14ded291-9361-41fe-9cfe-15191b6e83e2" />
 
 # 🏛️ VAANI
 ### Vigilant Administration & Accountability Network Intelligence
