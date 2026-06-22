@@ -232,38 +232,42 @@ export default function ComplaintsPage() {
         </div>
 
         {/* District Filter */}
-        <div className="form-group" style={{ marginBottom: 0, minWidth: 180 }}>
-          <select
-            className="form-select"
-            value={districtFilter}
-            onChange={(e) => handleFilterChange(setDistrictFilter, e.target.value)}
-            disabled={user && user.role === 'district_officer'}
-            id="filter-district"
-            style={{ minHeight: 44 }}
-          >
-            <option value="all">All Districts</option>
-            {DELHI_DISTRICTS.map(d => (
-              <option key={d.id} value={d.id}>{d.name.split('/')[0].trim()}</option>
-            ))}
-          </select>
-        </div>
+        {(!user || user.role !== 'officer') && (
+          <div className="form-group" style={{ marginBottom: 0, minWidth: 180 }}>
+            <select
+              className="form-select"
+              value={districtFilter}
+              onChange={(e) => handleFilterChange(setDistrictFilter, e.target.value)}
+              disabled={user && user.role === 'district_officer'}
+              id="filter-district"
+              style={{ minHeight: 44 }}
+            >
+              <option value="all">All Districts</option>
+              {DELHI_DISTRICTS.map(d => (
+                <option key={d.id} value={d.id}>{d.name.split('/')[0].trim()}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Department Filter */}
-        <div className="form-group" style={{ marginBottom: 0, minWidth: 180 }}>
-          <select
-            className="form-select"
-            value={departmentFilter}
-            onChange={(e) => handleFilterChange(setDepartmentFilter, e.target.value)}
-            disabled={user && ['department_manager', 'nodal_officer', 'commissioner'].includes(user.role)}
-            id="filter-department"
-            style={{ minHeight: 44 }}
-          >
-            <option value="all">All Departments</option>
-            {DEPARTMENTS.map(d => (
-              <option key={d.id} value={d.id}>{d.name}</option>
-            ))}
-          </select>
-        </div>
+        {(!user || user.role !== 'officer') && (
+          <div className="form-group" style={{ marginBottom: 0, minWidth: 180 }}>
+            <select
+              className="form-select"
+              value={departmentFilter}
+              onChange={(e) => handleFilterChange(setDepartmentFilter, e.target.value)}
+              disabled={user && ['department_manager', 'nodal_officer', 'commissioner'].includes(user.role)}
+              id="filter-department"
+              style={{ minHeight: 44 }}
+            >
+              <option value="all">All Departments</option>
+              {DEPARTMENTS.map(d => (
+                <option key={d.id} value={d.id}>{d.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Sort */}
         <div className="form-group" style={{ marginBottom: 0, minWidth: 140 }}>
