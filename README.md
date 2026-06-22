@@ -745,18 +745,28 @@ This is the easiest zero-config deployment option.
 3. Copy the connection string: `mongodb+srv://user:pass@cluster.mongodb.net/vaani`
 4. Set it as `MONGODB_URI` in Railway
 
-#### Deploy Frontend to Vercel
+#### Deploy Frontend to Vercel (with Subdomains)
 
-1. Go to [vercel.com](https://vercel.com) and sign in with GitHub
-2. Click **"Add New Project"** → Import your repository
-3. Set **Root Directory** to `/` (the Next.js root)
-4. Add environment variables:
-   ```
+1. Go to [vercel.com](https://vercel.com) and sign in with GitHub.
+2. Click **"Add New Project"** and import your repository.
+3. Set **Root Directory** to `/` (the Next.js root).
+4. Add the following environment variables:
+   ```env
    NEXT_PUBLIC_API_URL=https://vaani-backend.up.railway.app/api
    NEXT_PUBLIC_SOCKET_URL=https://vaani-backend.up.railway.app
    NEXT_PUBLIC_DEMO_MODE=true
    ```
-5. Click **Deploy**
+5. Click **Deploy**.
+6. **Configure Custom Subdomains**:
+   - Go to your Project dashboard in Vercel.
+   - Navigate to **Settings** ➔ **Domains**.
+   - Add your main custom domain, e.g., `vaani.site`.
+   - Add a wildcard domain entry: `*.vaani.site` (this enables dynamic subdomains like `citizen.vaani.site`, `cm.vaani.site`, `officer.vaani.site`, etc.).
+7. **DNS Configuration**:
+   In your domain registrar's DNS panel, add the following records:
+   - **A Record**: Host `@` pointing to `76.76.21.21` (Vercel IP).
+   - **CNAME Record**: Host `www` pointing to `cname.vercel-dns.com`.
+   - **CNAME Record**: Host `*` pointing to `cname.vercel-dns.com` (for wildcard routing).
 
 #### Seed Production Database
 
@@ -904,6 +914,46 @@ volumes:
 docker-compose up -d
 docker-compose exec backend npm run seed  # seed database
 ```
+
+## 🧪 Testing & Verification
+
+VAANI is optimized and audited for production deployment across all screen resolutions and multi-tenant subdomains.
+
+### 📱 Responsive Targets
+The application layout dynamically scales without text overlaps, clipped buttons, or horizontal scrolls on the following resolutions:
+1. **Mobile**: `360x640`, `375x667`, `390x844`, `412x915`
+2. **Tablet**: `768x1024`, `820x1180`, `1024x1366`
+3. **Laptop**: `1366x768`, `1440x900`
+4. **Desktop & Ultra-Wide**: `1920x1080`, `2560x1440`
+
+### 💻 Local Subdomain testing
+To test the dynamic role-based subdomains locally:
+1. Edit your system `/etc/hosts` file:
+   ```bash
+   sudo nano /etc/hosts
+   ```
+2. Add the loopback mappings:
+   ```etc
+   127.0.0.1  vaani.local
+   127.0.0.1  citizen.vaani.local
+   127.0.0.1  officer.vaani.local
+   127.0.0.1  cm.vaani.local
+   ```
+3. Run the Next.js local server on port 3000:
+   ```bash
+   npm run dev
+   ```
+4. Access `http://citizen.vaani.local:3000` or `http://cm.vaani.local:3000` to verify auto-detection middleware in action.
+
+### ⚙️ Verification Checks
+* **Next.js Production Compilation**: Validate frontend builds cleanly:
+  ```bash
+  npm run build
+  ```
+* **No Horizontal Scrolling**: The main wrapper (`.app-layout` and `.app-main`) enforces `max-width: 100vw; overflow-x: hidden;` to ensure it fits the viewport precisely.
+* **Scrollable Data Tables**: Tabular data cells are wrapped in overflow scroll elements to support horizontal swipes on smaller mobile displays.
+* **Full-Screen Mobile Modals**: Dialog screens automatically resize to full width/height on screens `<480px` with vertical body scrolling, keeping confirmation buttons visible.
+* **Adaptive Accountability Podium**: Gold/Silver/Bronze leaderboard listings automatically stack vertically into horizontal rows under `580px` screen widths to prevent text cropping.
 
 ---
 
